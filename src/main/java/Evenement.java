@@ -10,17 +10,40 @@ public class Evenement {
     private Integer temps; // En demi-journées, temps auquel l'évènement occurera
     private Container container; // Le container concerné par l'évènement.
 
-    private Integer nbContainers; // type=1 : Le nombre de containers qui doivent être créés par la demande.
+    private Integer nbContainers; // type=0 : Le nombre de containers qui doivent être créés par la demande.
 
-    private Service from; // type=1 : le Service où ajouter le container
-                            //type=2 : le Service où est actuellement le container
-    private Service to; // type=2 : Le service où le container va
+    private Service from; // type=0 : le Service où ajouter le container
+                            //type=1 : le Service où est actuellement le container
+                            //type=2 : le Service où supprimer le container.
+    private Service to; // type=1 : Le service où le container va
+
+    private Itineraire itineraire; // type=0 : l'itinéraire du container.
 
 
+    // En cas de nouvelle demande (type = 0)
     public Evenement( Demande d, int temps){
         this.type = 0;
         this.temps = temps;
         this.from = d.getItineraire().arrets.get(0);
         this.nbContainers = d.getNbConteneurs();
+        this.itineraire = d.getItineraire();
+    }
+
+    //En cas de décrémentation de NbContainers
+    public Evenement( Evenement e, int temps, int nbContainers){
+        this.type = 0;
+        this.temps = temps;
+        this.from = e.getItineraire().arrets.get(0);
+        this.nbContainers = nbContainers;
+        this.itineraire = e.getItineraire();
+    }
+
+    // En cas de déplacement d'un container
+    public Evenement(Container c, Service from, Service to, int temps){
+        this.type = 1;
+        this.temps = temps;
+        this.from = from;
+        this.to = to;
+        this.container = c;
     }
 }

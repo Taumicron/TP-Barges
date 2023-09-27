@@ -3,6 +3,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * Classe modélisant un service, qui communique avec les autres services, pour faire transiter des containers
@@ -32,6 +33,24 @@ public class Service {
         } else {
             r.getService().get(0).routes.add(r);
         }
-        return;
+    }
+
+    public Evenement creerContainer(Evenement e, ArrayList<Evenement> evt) {
+        if (this.capacite.size() < this.cs) {
+            Container temp = new Container(e.getItineraire(), this);
+            this.capacite.add(temp);
+            return new Evenement(temp, temp.getPosition(), temp.getItineraire().prochainArret(this), Math.max(1, prochaineDispo(evt))); // Retourne le prochain évènement du container.
+        }
+        return null;
+    }
+
+    // Retourne le temps de la prochaine disponibilité du Service (pour pouvoir prendre en charge une demande. Retourne 0 si instantané
+    public Integer prochaineDispo(ArrayList<Evenement> events){
+        if (this.capacite.size() -1 < this.cs ){
+            return 0;
+        }
+        Optional<Evenement> optEvt = events.stream().filter(x -> x.getType() == 1 && x.getTo() == this).findFirst();
+        if (optEvt.isEmpty()) return 0; // S'il n'y a pas d'évènement concernant un déplacement vers ce container (redondant)
+        return optEvt.get().getTemps();
     }
 }

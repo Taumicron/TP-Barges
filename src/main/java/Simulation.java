@@ -16,6 +16,8 @@ public class Simulation {
     public Simulation(){
         this.services = new ArrayList<>();
         this.containers = new ArrayList<>();
+        this.demandes = new ArrayList<>();
+        this.events = new ArrayList<>();
     }
 
     public static void main(String[] args) {
@@ -34,7 +36,7 @@ public class Simulation {
         s.services.get(0).addRoute(new Route(s.services.get(3), s.services.get(0), 3));
 
         // Vérification des liaisons (identification des services par les Cs)
-        // s.services.forEach(x -> x.getRoutes().forEach(y -> System.out.println("Service " + x.getCs() + " from " + y.getService().get(0).getCs()+ " to "+ y.getService().get(1).getCs())));
+        s.services.forEach(x -> x.getRoutes().forEach(y -> System.out.println("Service " + x.getCs() + " from " + y.getService().get(0).getCs()+ " to "+ y.getService().get(1).getCs())));
 
         //Ajout d'une demande
         s.demandes.add(new Demande(3, new Itineraire(new ArrayList<>(Arrays.asList(new Service[]{
@@ -47,18 +49,34 @@ public class Simulation {
         s.events.add(new Evenement(s.demandes.remove(0), 0));
         Integer temps_simu = -1;
         Evenement actuel = null;
-        do {
-            s.events.sort(Comparator.comparing(Evenement::getTemps));
+        do { // Boucle de simulation
+            s.events.sort(Comparator.comparing(Evenement::getTemps)); // Filtrage
             actuel = s.events.remove(0);
-            if (actuel.getType() == 0){
-                
+            temps_simu = actuel.getTemps();
+            if (actuel.getType() == 0) { //
+                Evenement nouv = actuel.getFrom().creerContainer(actuel, s.events);
+                if (nouv != null){
+                    actuel.setNbContainers(actuel.getNbContainers() - 1);
+                    s.events.add(nouv);
+                    s.containers.add(nouv.getContainer());
+                }
+                if (actuel.getNbContainers() > 0){
+                    s.events.add(new Evenement(actuel, actuel.getFrom().prochaineDispo(s.events), actuel.getNbContainers()));
+                }
+                // Si nbConteneurs != 0, ajouter un évènement
             } else if (actuel.getType() == 1) {
-                
+
             } else if (actuel.getType() == 2) {
                 
             }
-        } while (!s.events.isEmpty());
+            temps_simu = actuel.getTemps();
+        } while (s.services.stream().anyMatch(x -> !x.getCapacite().isEmpty()) && !s.events.isEmpty());
 
 
     }
+
+    public void ajouterContainer(Evenement e) {
+        e.getFrom().creerContainer(e, this.events);
+    }
+    
 }
