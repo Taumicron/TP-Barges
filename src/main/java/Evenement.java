@@ -46,4 +46,11 @@ public class Evenement {
         this.to = to;
         this.container = c;
     }
+
+    //En cas de suppression d'un container
+    public Evenement(Container c, int temps){
+        this.type = 3;
+        this.temps = temps;
+        this.from = c.getPosition();
+    }
 }

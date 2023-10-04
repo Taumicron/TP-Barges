@@ -53,19 +53,27 @@ public class Simulation {
             s.events.sort(Comparator.comparing(Evenement::getTemps)); // Filtrage
             actuel = s.events.remove(0);
             temps_simu = actuel.getTemps();
-            if (actuel.getType() == 0) { //
-                Evenement nouv = actuel.getFrom().creerContainer(actuel, s.events);
-                if (nouv != null){
-                    actuel.setNbContainers(actuel.getNbContainers() - 1);
-                    s.events.add(nouv);
-                    s.containers.add(nouv.getContainer());
+            if (actuel.getType() == 0) { // Si l'évènement est une création de container
+                if (actuel.getFrom().getCapacite().size() < actuel.getFrom().getCs()) { // Si le service peut contenir ce nouveau container
+                    Evenement nouv = actuel.getFrom().creerContainer(actuel, s.events);
+                    if (nouv != null){
+                        s.events.add(nouv);
+                        s.containers.add(nouv.getContainer());
+                    }
+                    if (actuel.getNbContainers() > 0) {
+                        s.events.add(new Evenement(actuel, actuel.getFrom().prochaineDispo(s.events), actuel.getNbContainers() - 1));
+                    }
+                } else { // Sinon on délaie la création de container.
+                    actuel.setTemps(actuel.getFrom().prochaineDispo(s.events));
                 }
-                if (actuel.getNbContainers() > 0){
-                    s.events.add(new Evenement(actuel, actuel.getFrom().prochaineDispo(s.events), actuel.getNbContainers()));
-                }
-                // Si nbConteneurs != 0, ajouter un évènement
-            } else if (actuel.getType() == 1) {
 
+            } else if (actuel.getType() == 1) { // Si l'évènement est un déplacement de conteneur (donc l'arrivée)
+                if (actuel.getTo().getCapacite().size() < actuel.getFrom().getCs()) {
+                    // TODO : Fonctionnement du déplacement d'un container.
+                    //actuel.
+                } else {
+                    actuel.setTemps(actuel.getTo().prochaineDispo(s.events));
+                }
             } else if (actuel.getType() == 2) {
                 
             }

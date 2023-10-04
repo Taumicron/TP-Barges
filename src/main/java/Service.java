@@ -39,9 +39,21 @@ public class Service {
         if (this.capacite.size() < this.cs) {
             Container temp = new Container(e.getItineraire(), this);
             this.capacite.add(temp);
-            return new Evenement(temp, temp.getPosition(), temp.getItineraire().prochainArret(this), Math.max(1, prochaineDispo(evt))); // Retourne le prochain évènement du container.
+            return new Evenement(temp, temp.getPosition(), temp.getItineraire().prochainArret(this),
+                    Math.max(this.tempsTrajet(temp.prochainArret(this)), prochaineDispo(evt))); // Retourne le prochain évènement du container.
         }
         return null;
+    }
+
+    // Retourne le temps de trajet du service actuel au service entré en paramètre. On suppose qu'une telle route existe
+    public Integer tempsTrajet(Service s){
+        Optional<Route> optRoute =  this.routes.stream().filter(x -> x.getService().contains(this) && x.getService().contains(s)).findFirst();
+        if (optRoute.isEmpty()){
+            System.err.println("Le trajet du service "+ this + " au service "+ s+ " n'existe pas.");
+            return 9999999;
+        } else {
+            return optRoute.get().getDuree();
+        }
     }
 
     // Retourne le temps de la prochaine disponibilité du Service (pour pouvoir prendre en charge une demande. Retourne 0 si instantané

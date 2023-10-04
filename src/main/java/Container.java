@@ -1,6 +1,8 @@
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+
 @Getter
 @Setter
 public class Container {
@@ -19,5 +21,17 @@ public class Container {
     //Retourne le prochain Service où le Container devra s'arrêter sur son itinéraire.
     public Service prochainArret(Service pos){
         return this.itineraire.prochainArret(pos);
+    }
+
+    public Evenement deplacementContainer(Service vers, int temps_simu, ArrayList<Evenement> evt){
+        this.position.getCapacite().remove(this);
+        this.position = vers;
+        vers.getCapacite().add(this);
+        if (this.position == this.to){
+            return new Evenement(this, temps_simu + 1);
+        } else {
+            return new Evenement(this, this.position, this.prochainArret(this.position),
+                    Math.max(this.position.tempsTrajet(this.prochainArret(this.position)), this.itineraire.prochainArret(this.position).tempsTrajet(this.position)));
+        }
     }
 }
