@@ -39,11 +39,10 @@ public class Simulation {
         s.services.forEach(x -> x.getRoutes().forEach(y -> System.out.println("Service " + x.getCs() + " from " + y.getService().get(0).getCs()+ " to "+ y.getService().get(1).getCs())));
 
         //Ajout d'une demande
-        s.demandes.add(new Demande(3, new Itineraire(new ArrayList<>(Arrays.asList(new Service[]{
+        s.demandes.add(new Demande(3, new Itineraire(new ArrayList<>(Arrays.asList(
                 s.services.get(0),
                 s.services.get(1),
-                s.getServices().get(2)
-        })))));
+                s.getServices().get(2))))));
 
         // Simulation
         s.events.add(new Evenement(s.demandes.remove(0), 0));
@@ -53,34 +52,38 @@ public class Simulation {
             s.events.sort(Comparator.comparing(Evenement::getTemps)); // Filtrage
             actuel = s.events.remove(0);
             temps_simu = actuel.getTemps();
+            System.out.print("Temps : "+temps_simu+" ");
             if (actuel.getType() == 0) { // Si l'évènement est une création de container
                 if (actuel.getFrom().getCapacite().size() < actuel.getFrom().getCs()) { // Si le service peut contenir ce nouveau container
                     Evenement nouv = actuel.getFrom().creerContainer(actuel, s.events);
+                    System.out.println("Le container "+nouv.getContainer()+" a été créé au Service "+ nouv.getFrom());
                     if (nouv != null){
                         s.events.add(nouv);
                         s.containers.add(nouv.getContainer());
                     }
-                    if (actuel.getNbContainers() > 0) {
-                        s.events.add(new Evenement(actuel, actuel.getFrom().prochaineDispo(s.events), actuel.getNbContainers() - 1));
+                    if (actuel.getNbContainers() > 1) {
+                        s.events.add(new Evenement(actuel, actuel.getFrom().prochaineDispo(s.events), actuel.getNbContainers()));
                     }
                 } else { // Sinon on délaie la création de container.
+                    System.err.println("La création d'un container est retardé car le Service "+actuel.getTo()+" est congestionné.");
                     actuel.setTemps(actuel.getFrom().prochaineDispo(s.events));
+                    s.events.add(actuel);
                 }
 
             } else if (actuel.getType() == 1) { // Si l'évènement est un déplacement de conteneur (donc l'arrivée)
                 if (actuel.getTo().getCapacite().size() < actuel.getFrom().getCs()) {
-                    // TODO : Fonctionnement du déplacement d'un container.
-                    //actuel.
+                    s.events.add(actuel.getContainer().deplacementContainer(actuel.getTo(),temps_simu, s.events));
+                    System.out.println("Le container "+actuel.getContainer()+" a été déplacé de "+actuel.getFrom()+" vers "+ actuel.getTo());
                 } else {
                     actuel.setTemps(actuel.getTo().prochaineDispo(s.events));
+                    System.err.println("Le déplacement du container "+actuel.getContainer()+" de "+actuel.getFrom()+" vers "+ actuel.getTo()+" a été retardé");
+                    s.events.add(actuel);
                 }
             } else if (actuel.getType() == 2) {
-                
+                actuel.getContainer().retirerContainer();
+                System.out.println("Le container "+ actuel.getFrom() + " a été retiré au Service "+actuel.getFrom());
             }
-            temps_simu = actuel.getTemps();
         } while (s.services.stream().anyMatch(x -> !x.getCapacite().isEmpty()) && !s.events.isEmpty());
-
-
     }
 
     public void ajouterContainer(Evenement e) {

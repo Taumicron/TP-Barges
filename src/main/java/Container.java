@@ -23,15 +23,29 @@ public class Container {
         return this.itineraire.prochainArret(pos);
     }
 
+    //
     public Evenement deplacementContainer(Service vers, int temps_simu, ArrayList<Evenement> evt){
         this.position.getCapacite().remove(this);
         this.position = vers;
         vers.getCapacite().add(this);
         if (this.position == this.to){
+            // Evenement de retrait du container
             return new Evenement(this, temps_simu + 1);
         } else {
+            // Evenement de déplacement du container
             return new Evenement(this, this.position, this.prochainArret(this.position),
-                    Math.max(this.position.tempsTrajet(this.prochainArret(this.position)), this.itineraire.prochainArret(this.position).tempsTrajet(this.position)));
+                    temps_simu + Math.max(this.position.tempsTrajet(this.prochainArret(this.position)), this.itineraire.prochainArret(this.position).tempsTrajet(this.position)));
         }
+    }
+    public void retirerContainer(){
+        if (this.position == this.to){
+            this.to.getCapacite().remove(this);
+            this.position = null;
+        }
+    }
+
+    @Override
+    public String toString(){
+        return String.valueOf(this.hashCode());
     }
 }

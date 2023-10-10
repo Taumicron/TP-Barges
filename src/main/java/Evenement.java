@@ -34,7 +34,7 @@ public class Evenement {
         this.type = 0;
         this.temps = temps;
         this.from = e.getItineraire().arrets.get(0);
-        this.nbContainers = nbContainers;
+        this.nbContainers = nbContainers - 1;
         this.itineraire = e.getItineraire();
     }
 
@@ -49,8 +49,9 @@ public class Evenement {
 
     //En cas de suppression d'un container
     public Evenement(Container c, int temps){
-        this.type = 3;
+        this.type = 2;
         this.temps = temps;
         this.from = c.getPosition();
+        this.container = c;
     }
 }

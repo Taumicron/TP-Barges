@@ -65,4 +65,9 @@ public class Service {
         if (optEvt.isEmpty()) return 0; // S'il n'y a pas d'évènement concernant un déplacement vers ce container (redondant)
         return optEvt.get().getTemps();
     }
+
+    @Override
+    public String toString(){
+        return String.valueOf(this.hashCode());
+    }
 }
