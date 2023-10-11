@@ -40,7 +40,7 @@ public class Service {
             Container temp = new Container(e.getItineraire(), this);
             this.capacite.add(temp);
             return new Evenement(temp, temp.getPosition(), temp.getItineraire().prochainArret(this),
-                    Math.max(this.tempsTrajet(temp.prochainArret(this)), prochaineDispo(evt))); // Retourne le prochain évènement du container.
+                    Math.max(this.tempsTrajet(temp.prochainArret(this)) + e.getTemps(), prochaineDispo(evt, e.getTemps()))); // Retourne le prochain évènement du container.
         }
         return null;
     }
@@ -56,13 +56,16 @@ public class Service {
         }
     }
 
-    // Retourne le temps de la prochaine disponibilité du Service (pour pouvoir prendre en charge une demande. Retourne 0 si instantané
-    public Integer prochaineDispo(ArrayList<Evenement> events){
-        if (this.capacite.size() -1 < this.cs ){
-            return 0;
+    // Retourne le temps à partor duquel le service sera disponible du Service (pour pouvoir prendre en charge une demande. Retourne 0 si instantané
+    public Integer prochaineDispo(ArrayList<Evenement> events, int temps_simu){
+        if (this.capacite.size() < this.cs ){
+            return temps_simu;
         }
-        Optional<Evenement> optEvt = events.stream().filter(x -> x.getType() == 1 && x.getTo() == this).findFirst();
-        if (optEvt.isEmpty()) return 0; // S'il n'y a pas d'évènement concernant un déplacement vers ce container (redondant)
+        // La liste des évènements a déjà été préalablement ordonnée en fonction du temps.
+        Optional<Evenement> optEvt = events.stream().filter(x -> x.getType() == 1 && x.getFrom() == this
+                                                                || x.getType() == 2 && x.getFrom() == this)
+                                                                .findFirst();
+        if (optEvt.isEmpty()) return temps_simu; // S'il n'y a pas d'évènement concernant un déplacement vers ce container (redondant)
         return optEvt.get().getTemps();
     }
 
