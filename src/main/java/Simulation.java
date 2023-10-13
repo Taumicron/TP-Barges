@@ -10,13 +10,11 @@ import java.util.Comparator;
 public class Simulation {
     private ArrayList<Service> services;
     private ArrayList<Container> containers;
-    private ArrayList<Demande> demandes;
     private ArrayList<Evenement> events;
 
     public Simulation(){
         this.services = new ArrayList<>();
         this.containers = new ArrayList<>();
-        this.demandes = new ArrayList<>();
         this.events = new ArrayList<>();
     }
 
@@ -24,8 +22,8 @@ public class Simulation {
         // Création de la matrice de routage
         Simulation s = new Simulation();
         // Ajout des Services
-        s.services.add(new Service(10)); s.services.add(new Service(20)); s.services.add(new Service(30));
-        s.services.add(new Service(40)); s.services.add(new Service(50));
+        s.services.add(new Service(3)); s.services.add(new Service(2)); s.services.add(new Service(1));
+        s.services.add(new Service(4)); s.services.add(new Service(5));
 
         // Ajout des routes
         s.services.get(0).addRoute(new Route(s.services.get(0), s.services.get(1), 3));
@@ -38,14 +36,16 @@ public class Simulation {
         // Vérification des liaisons (identification des services par les Cs)
         s.services.forEach(x -> x.getRoutes().forEach(y -> System.out.println("Service " + x.getCs() + " from " + y.getService().get(0).getCs()+ " to "+ y.getService().get(1).getCs())));
 
-        //Ajout d'une demande
-        s.demandes.add(new Demande(40, new Itineraire(new ArrayList<>(Arrays.asList(
-                s.services.get(0),
-                s.services.get(1),
-                s.getServices().get(2))))));
+        //Ajout d'un Itinéraire pour ajouter une demande de nombre de containers
+        Itineraire i = new Itineraire(new ArrayList<>(Arrays.asList(
+                s.services.get(0), s.services.get(1), s.services.get(2))));
+        s.events.add(new Evenement(0, 1, i));
+        i = new Itineraire(new ArrayList<>(Arrays.asList(
+                s.services.get(1), s.services.get(4), s.services.get(3)
+        )));
+        s.events.add(new Evenement(10, 10, i));
 
         // Simulation
-        s.events.add(new Evenement(s.demandes.remove(0), 0));
         Integer temps_simu = -1;
         Evenement actuel = null;
         do { // Boucle de simulation
@@ -82,7 +82,7 @@ public class Simulation {
                 actuel.getContainer().retirerContainer();
                 System.out.println("Le container "+ actuel.getFrom() + " a été retiré au Service "+actuel.getFrom());
             }
-        } while (s.services.stream().anyMatch(x -> !x.getCapacite().isEmpty()) && !s.events.isEmpty());
+        } while (s.services.stream().anyMatch(x -> !x.getCapacite().isEmpty()) || !s.events.isEmpty());
     }
 
 }

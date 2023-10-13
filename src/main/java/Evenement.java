@@ -21,12 +21,12 @@ public class Evenement {
 
 
     // En cas de nouvelle demande (type = 0)
-    public Evenement( Demande d, int temps){
+    public Evenement(int temps, int nbContainers, Itineraire i){
         this.type = 0;
         this.temps = temps;
-        this.from = d.getItineraire().arrets.get(0);
-        this.nbContainers = d.getNbConteneurs();
-        this.itineraire = d.getItineraire();
+        this.from = i.arrets.get(0);
+        this.nbContainers = nbContainers;
+        this.itineraire = i;
     }
 
     //En cas de décrémentation de NbContainers
