@@ -12,10 +12,10 @@ public class Evenement {
 
     private Integer nbContainers; // type=0 : Le nombre de containers qui doivent être créés par la demande.
 
-    private Service from; // type=0 : le Service où ajouter le container
-                            //type=1 : le Service où est actuellement le container
-                            //type=2 : le Service où supprimer le container.
-    private Service to; // type=1 : Le service où le container va
+    private Port from; // type=0 : le Port où ajouter le container
+                            //type=1 : le Port où est actuellement le container
+                            //type=2 : le Port où supprimer le container.
+    private Port to; // type=1 : Le port où le container va
 
     private Itineraire itineraire; // type=0 : l'itinéraire du container.
 
@@ -39,7 +39,7 @@ public class Evenement {
     }
 
     // En cas de déplacement d'un container
-    public Evenement(Container c, Service from, Service to, int temps){
+    public Evenement(Container c, Port from, Port to, int temps){
         this.type = 1;
         this.temps = temps;
         this.from = from;

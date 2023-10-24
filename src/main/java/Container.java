@@ -1,16 +1,14 @@
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-
 @Getter
 @Setter
 public class Container {
     private Itineraire itineraire; // Itinéraire du container
-    private Service from; // Service depuis lequel le container est envoyé
-    private Service to; //Service final vers lequel le container est envoyé.
-    private Service position; // Position actuelle, -1 = pas encore dans la simulation
-    public Container (Itineraire i, Service position){
+    private Port from; // Port depuis lequel le container est envoyé
+    private Port to; //Port final vers lequel le container est envoyé.
+    private Port position; // Position actuelle, -1 = pas encore dans la simulation
+    public Container (Itineraire i, Port position){
         assert position.getCapacite().size() < position.getCs();
         this.itineraire = i;
         this.from = i.arrets.get(0);
@@ -18,13 +16,13 @@ public class Container {
         this.position = position;
     }
 
-    //Retourne le prochain Service où le Container devra s'arrêter sur son itinéraire.
-    public Service prochainArret(Service pos){
+    //Retourne le prochain Port où le Container devra s'arrêter sur son itinéraire.
+    public Port prochainArret(Port pos){
         return this.itineraire.prochainArret(pos);
     }
 
     //
-    public Evenement deplacementContainer(Service vers, int temps_simu, ArrayList<Evenement> evt){
+    public Evenement deplacementContainer(Port vers, int temps_simu){
         this.position.getCapacite().remove(this);
         this.position = vers;
         vers.getCapacite().add(this);
