@@ -26,16 +26,17 @@ public class Simulation {
         System.out.println(System.getProperty("user.dir"));
         s.lire_fichiers("./src/main/resources/exemple");
         // Simulation
-        Integer temps_simu = -1;
+        Integer temps_simu = -1, idContainer = 0;
         Evenement actuel = null;
         do { // Boucle de simulation
-            s.events.sort(Comparator.comparing(Evenement::getTemps).thenComparing(Evenement::getType, Comparator.reverseOrder())); // Filtrage
+            s.events.sort(Comparator.comparing(Evenement::getTemps) // Tri du plus récent au plus vieux
+                                    .thenComparing(Evenement::getType, Comparator.reverseOrder())); // Et tri des retraits, puis des déplacements, puis des créations de containers
             actuel = s.events.remove(0);
             temps_simu = actuel.getTemps();
             System.out.print("Temps : "+temps_simu+" ");
             if (actuel.getType() == 0) { // Si l'évènement est une création de container
                 if (actuel.getFrom().getCapacite().size() < actuel.getFrom().getCs()) { // Si le port peut contenir ce nouveau container
-                    Evenement nouv = actuel.getFrom().creerContainer(actuel, s.events);
+                    Evenement nouv = actuel.getFrom().creerContainer(++idContainer, actuel, s.events);
                     System.out.println("Le container "+nouv.getContainer()+" a été créé au Port "+ nouv.getFrom());
                     if (nouv != null){
                         s.events.add(nouv);
@@ -45,7 +46,7 @@ public class Simulation {
                         s.events.add(new Evenement(actuel, actuel.getFrom().prochaineDispo(s.events, temps_simu), actuel.getNbContainers()));
                     }
                 } else { // Sinon on délaie la création de container.
-                    System.out.println("La création d'un container est retardé car le Port "+actuel.getFrom()+" est congestionné.");
+                    System.out.println("La création d'un container est retardé car le Port "+actuel.getFrom()+" est congestionné");
                     actuel.setTemps(actuel.getFrom().prochaineDispo(s.events, temps_simu));
                     s.events.add(actuel);
                 }
@@ -58,9 +59,9 @@ public class Simulation {
                     actuel.setTemps(actuel.getTo().prochaineDispo(s.events, temps_simu));
                     s.events.add(actuel);
                 }
-            } else if (actuel.getType() == 2) {
+            } else if (actuel.getType() == 2) { // Si l'évènement est un retrait de container
                 actuel.getContainer().retirerContainer();
-                System.out.println("Le container "+ actuel.getFrom() + " a été retiré au Port "+actuel.getFrom());
+                System.out.println("Le container "+ actuel.getContainer() + " a été retiré au Port "+actuel.getFrom());
             }
         } while (s.ports.stream().anyMatch(x -> !x.getCapacite().isEmpty()) || !s.events.isEmpty());
     }

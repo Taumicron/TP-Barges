@@ -4,12 +4,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Container {
+    private Integer id;
     private Itineraire itineraire; // Itinéraire du container
     private Port from; // Port depuis lequel le container est envoyé
     private Port to; //Port final vers lequel le container est envoyé.
     private Port position; // Position actuelle, -1 = pas encore dans la simulation
-    public Container (Itineraire i, Port position){
+    public Container (int id, Itineraire i, Port position){
         assert position.getCapacite().size() < position.getCs();
+        this.id = id;
         this.itineraire = i;
         this.from = i.arrets.get(0);
         this.to = i.arrets.get(i.arrets.size()-1);
@@ -44,6 +46,6 @@ public class Container {
 
     @Override
     public String toString(){
-        return String.valueOf(this.hashCode());
+        return String.valueOf(this.id);
     }
 }

@@ -35,9 +35,9 @@ public class Port {
         }
     }
 
-    public Evenement creerContainer(Evenement e, ArrayList<Evenement> evt) {
+    public Evenement creerContainer(Integer id, Evenement e, ArrayList<Evenement> evt) {
         if (this.capacite.size() < this.cs) {
-            Container temp = new Container(e.getItineraire(), this);
+            Container temp = new Container(id, e.getItineraire(), this);
             this.capacite.add(temp);
             return new Evenement(temp, temp.getPosition(), temp.getItineraire().prochainArret(this),
                     Math.max(this.tempsTrajet(temp.prochainArret(this)) + e.getTemps(), prochaineDispo(evt, e.getTemps()))); // Retourne le prochain évènement du container.
@@ -71,6 +71,6 @@ public class Port {
 
     @Override
     public String toString(){
-        return String.valueOf(this.hashCode());
+        return String.valueOf(this.id);
     }
 }
