@@ -1,9 +1,9 @@
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
 
 @Getter
 @Setter
@@ -13,38 +13,18 @@ public class Simulation {
     private ArrayList<Evenement> events;
 
     public Simulation(){
+        // ID | Capacité
         this.ports = new ArrayList<>();
         this.containers = new ArrayList<>();
         this.events = new ArrayList<>();
     }
 
-    public static void main(String[] args) {
-        // Création de la matrice de routage
+    public static void main(String[] args) throws FileNotFoundException {
         Simulation s = new Simulation();
-        // Ajout des ports
-        s.ports.add(new Port(3)); s.ports.add(new Port(2)); s.ports.add(new Port(1));
-        s.ports.add(new Port(4)); s.ports.add(new Port(5));
 
-        // Ajout des services
-        s.ports.get(0).addService(new Service(s.ports.get(0), s.ports.get(1), 3));
-        s.ports.get(1).addService(new Service(s.ports.get(1), s.ports.get(2), 2));
-        s.ports.get(1).addService(new Service(s.ports.get(3), s.ports.get(1), 4));
-        s.ports.get(1).addService(new Service(s.ports.get(1), s.ports.get(4), 5));
-        s.ports.get(3).addService(new Service(s.ports.get(3), s.ports.get(4), 1));
-        s.ports.get(0).addService(new Service(s.ports.get(3), s.ports.get(0), 3));
-
-        // Vérification des liaisons (identification des ports par les Cs)
-        s.ports.forEach(x -> x.getServices().forEach(y -> System.out.println("Port " + x.getCs() + " from " + y.getPort().get(0).getCs()+ " to "+ y.getPort().get(1).getCs())));
-
-        //Ajout d'un Itinéraire pour ajouter une demande de nombre de containers
-        Itineraire i = new Itineraire(new ArrayList<>(Arrays.asList(
-                s.ports.get(0), s.ports.get(1), s.ports.get(2))));
-        s.events.add(new Evenement(0, 1, i));
-        i = new Itineraire(new ArrayList<>(Arrays.asList(
-                s.ports.get(1), s.ports.get(4), s.ports.get(3)
-        )));
-        s.events.add(new Evenement(10, 10, i));
-
+        //Chemin actuel (pour se repérer pour trouver le fichier à lire)
+        System.out.println(System.getProperty("user.dir"));
+        s.lire_fichiers("./src/main/resources/exemple");
         // Simulation
         Integer temps_simu = -1;
         Evenement actuel = null;
@@ -85,4 +65,49 @@ public class Simulation {
         } while (s.ports.stream().anyMatch(x -> !x.getCapacite().isEmpty()) || !s.events.isEmpty());
     }
 
+    /**
+     * Lit le fichier entré en paramètres et crée les ports, les services, et les évènements de demande concernés.
+     * On suppose que le fichier entré est au bon format.
+     */
+    private void lire_fichiers(String nomFichier) throws FileNotFoundException {
+        File f = new File(nomFichier);
+        Scanner sc = new Scanner(f);
+        //Ajout des ports
+        String temp;
+        String[] val;
+        sc.nextLine(); sc.nextLine(); // Passage des 2 premières lignes
+        while (!Objects.equals(temp = sc.nextLine(), "Services")){
+            val = temp.split(" ");
+            this.ports.add(new Port(Integer.parseInt(val[0]), Integer.parseInt(val[1])));
+        }
+
+        // Ajout des services (on les suppose bidirectionnels : A -> B crée également B -> A
+        sc.nextLine();
+        while(!Objects.equals(temp = sc.nextLine(), "Demandes")){
+            val = temp.split(" ");
+            Service tempService = new Service(this.portById(Integer.parseInt(val[0])), this.portById(Integer.parseInt(val[1])), Integer.parseInt(val[2]));
+            this.portById(Integer.parseInt(val[0])).addService(tempService);
+        }
+
+        // Ajout des Demandes (évènements de création de containers)
+        sc.nextLine();
+        while(sc.hasNextLine()){
+            temp = sc.nextLine();
+            val = temp.split(" ");
+            int[] tempItineraire = Arrays.stream(val[2].split(";")).mapToInt(Integer::parseInt).toArray();
+            ArrayList<Port> itin = new ArrayList<>(); Arrays.stream(tempItineraire).forEach(x -> itin.add(this.portById(x)));
+            this.events.add(new Evenement(Integer.parseInt(val[0]), Integer.parseInt(val[1]), new Itineraire(itin)));
+        }
+        sc.close();
+    }
+
+    /**
+     * Retourne le port correspondant s'il existe
+     * @param id du port
+     * @return Le port ou NULL si le port n'existe pas
+     */
+    private Port portById(int id){
+        Optional<Port> temp = this.ports.stream().filter(x -> x.getId() == id).findFirst();
+        return temp.orElse(null);
+    }
 }

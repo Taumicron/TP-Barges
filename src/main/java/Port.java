@@ -1,6 +1,5 @@
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -11,11 +10,13 @@ import java.util.Optional;
 @Getter
 @Setter
 public class Port {
+    private Integer id;
     private ArrayList<Service> services; // Liste des services depuis ce port. A l'échelle de l'ensemble des Port, cela représente la matrice de routage.
     private Integer cs; //Capacité max en containers
     private ArrayList<Container> capacite; // Liste des containers présents sur ce port. (la longueur représente la capacité actuelle)
 
-    public Port(int cs){
+    public Port(int id, int cs){
+        this.id = id;
         this.services = new ArrayList<>();
         this.cs = cs;
         this.capacite = new ArrayList<>();
