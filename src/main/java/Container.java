@@ -26,7 +26,6 @@ public class Container {
     public void retirerContainer(){
         if (this.position == this.to){
             this.to.getCapacite().remove(this);
-            this.position = null;
         }
     }
 

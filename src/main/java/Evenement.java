@@ -4,9 +4,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Evenement {
-    private Integer type;   // 0 : départ d'un container dans le système
-                    // 1 : Déplacement d'un container dans le système
-                    // 2 : Retrait d'un container dans le système (arrivé à destination)
+    private Integer type;   // 0 : Création d'un container dans le système (suite à une demande)
+                    // 1 : Placement d'un container sur un bateau
+                    // 2 : Détache d'un bateau de son port
+                    // 3 : Rattachement d'un bateau à son port d'arrivée
+                    // 4 : Dépot d'un container sur un port par un bateau
+                    // 5 : Retrait d'un container arrivé à sa destination finale.
     private Integer temps; // En demi-journées, temps auquel l'évènement occurera
     private Container container; // Le container concerné par l'évènement.
 
@@ -22,7 +25,7 @@ public class Evenement {
     private Bateau bateau; // Bateau concerné par l'évènement
 
 
-    // En cas de nouvelle demande (type = 0)
+    // En cas de nouvelle demande
     public Evenement(int temps, int nbContainers, Itineraire i){
         this.type = 0;
         this.temps = temps;
@@ -62,7 +65,7 @@ public class Evenement {
         this.type = 3;
         this.temps = temps;
         this.bateau = b;
-        this.to = b.getDestination();
+        this.to = dest;
     }
 
     // Vidage d'un container du bateau sur le port.

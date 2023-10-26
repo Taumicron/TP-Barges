@@ -59,11 +59,8 @@ public class Port {
 
     public Bateau getBateauByDestination(Port destination, List<Evenement> events, int temps){
         Optional<Bateau> temp = this.bateaux.stream().filter(x -> x.getDestination() == destination).findFirst();
-        if (temp.isEmpty()){ // Si un tel bateau n'existe pas, on le créé pour le retourner
-            Bateau b = new Bateau(3, this, destination, temps);
-            this.bateaux.add(b);
-            events.add(b.getDepartPrevu());
-            return b;
+        if (temp.isEmpty()){ // Si un tel bateau n'est pas disponible
+            return null;
         } else if (temp.get().getCapacite().size() == temp.get().getCapaciteMax()){
             return null;
         } else {
