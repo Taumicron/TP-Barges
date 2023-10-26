@@ -26,40 +26,85 @@ public class Simulation {
         System.out.println(System.getProperty("user.dir"));
         s.lire_fichiers("./src/main/resources/exemple");
         // Simulation
-        Integer temps_simu = -1, idContainer = 0;
+        int temps_simu = -1, idContainer = 0;
         Evenement actuel = null;
         do { // Boucle de simulation
             s.events.sort(Comparator.comparing(Evenement::getTemps) // Tri du plus récent au plus vieux
-                                    .thenComparing(Evenement::getType, Comparator.reverseOrder())); // Et tri des retraits, puis des déplacements, puis des créations de containers
+                                    .thenComparing(Evenement::getType, Comparator.reverseOrder())); // Et tri des types d'Evt. 5 > 4 > 3 > 2 > 1 > 0
             actuel = s.events.remove(0);
             temps_simu = actuel.getTemps();
             System.out.print("Temps : "+temps_simu+" ");
-            if (actuel.getType() == 0) { // Si l'évènement est une création de container
+            if (actuel.getType() == 0) { // Création de container sur le port.
                 if (actuel.getFrom().getCapacite().size() < actuel.getFrom().getCs()) { // Si le port peut contenir ce nouveau container
-                    Evenement nouv = actuel.getFrom().creerContainer(++idContainer, actuel, s.events);
-                    System.out.println("Le container "+nouv.getContainer()+" a été créé au Port "+ nouv.getFrom());
+                    Evenement nouv = actuel.getFrom().creerContainer(++idContainer, actuel, temps_simu);
+                    System.out.println("Le container "+nouv.getContainer()+" a été créé au Port "+ nouv.getContainer().getPosition());
                     if (nouv != null){
                         s.events.add(nouv);
                         s.containers.add(nouv.getContainer());
                     }
                     if (actuel.getNbContainers() > 1) {
-                        s.events.add(new Evenement(actuel, actuel.getFrom().prochaineDispo(s.events, temps_simu), actuel.getNbContainers()));
+                        s.events.add(new Evenement(actuel, temps_simu, actuel.getNbContainers()));
                     }
                 } else { // Sinon on délaie la création de container.
                     System.out.println("La création d'un container est retardé car le Port "+actuel.getFrom()+" est congestionné");
-                    actuel.setTemps(actuel.getFrom().prochaineDispo(s.events, temps_simu));
+                    actuel.setTemps(temps_simu + 1);
                     s.events.add(actuel);
                 }
-            } else if (actuel.getType() == 1) { // Si l'évènement est un déplacement de conteneur
-                if (actuel.getTo().getCapacite().size() < actuel.getTo().getCs()) {
-                    s.events.add(actuel.getContainer().deplacementContainer(actuel.getTo(),temps_simu));
-                    System.out.println("Le container "+actuel.getContainer()+" a été déplacé de "+actuel.getFrom()+" vers "+ actuel.getTo());
+            } else if (actuel.getType() == 1) { // Placement du container sur un bateau.
+                // temp <- Bateau sur lequel poser le container.
+                Bateau temp = actuel.getContainer().getPosition().getBateauByDestination(actuel.getContainer().prochainArret(actuel.getContainer().getPosition()), s.events, temps_simu);
+                if (temp != null){
+                    actuel.getContainer().getPosition().getCapacite().remove(actuel.getContainer());
+                    actuel.getContainer().setPosition(null);
+                    temp.ajouterContainer(actuel.getContainer());
+                    System.out.print("Le container "+ actuel.getContainer() + " a été attaché à un bateau. ");
+                    if (temp.getCapaciteMax() == temp.getCapacite().size()){
+                        s.events.remove(temp.getDepartPrevu()); // Retrait de l'évent de départ par défaut
+                        temp.setDepartPrevu(new Evenement(temps_simu + 1, temp));
+                        s.events.add(temp.getDepartPrevu());
+                        System.out.print("Le bateau est au maximum de sa capacité. Départ imminent");
+                    }
                 } else {
-                    System.out.println("Le déplacement du container "+actuel.getContainer()+" de "+actuel.getFrom()+" vers "+ actuel.getTo()+" a été retardé");
-                    actuel.setTemps(actuel.getTo().prochaineDispo(s.events, temps_simu));
+                    System.out.print("Le container "+ actuel.getContainer() + " n'a pas pu être rattaché à un bateau car celui prévu est complet.");
+                    actuel.setTemps(temps_simu+1);
                     s.events.add(actuel);
                 }
-            } else if (actuel.getType() == 2) { // Si l'évènement est un retrait de container
+                System.out.println();
+            } else if (actuel.getType() == 2) { // Détache du bateau de son port.
+                s.events.add(new Evenement(temps_simu + actuel.getFrom().tempsTrajet(actuel.getBateau().getDestination()), actuel.getBateau(), actuel.getBateau().getDestination())); //Evenement de rattache au port.
+                actuel.getBateau().getPortAttache().getBateaux().remove(actuel.getBateau());
+                System.out.println("Un bateau part du port "+ actuel.getFrom()+" avec les containers "+ actuel.getBateau().getCapacite());
+                actuel.getBateau().setPortAttache(null);
+            } else if (actuel.getType() == 3) { // Attache le bateau a son port, en vue de le vider de ses containers.
+                actuel.getTo().getBateaux().add(actuel.getBateau());
+                actuel.getBateau().setPortAttache(actuel.getTo());
+                s.events.add(new Evenement(actuel.getBateau(), temps_simu + 1));
+                System.out.println("Le port "+ actuel.getTo()+" vient de réceptionner "+ actuel.getBateau());
+            } else if (actuel.getType() == 4) { // Déplacement du container sur le port en vue de sa décharge.
+                if (actuel.getTo().getCapacite().size() < actuel.getTo().getCs()){
+                    Container temp = actuel.getBateau().getCapacite().remove(0);
+                    System.out.println("Le container "+ temp + " a été déposé au port "+actuel.getTo());
+                    actuel.getTo().getCapacite().add(temp);
+                    temp.setPosition(actuel.getTo());
+                    if (temp.getPosition() == temp.getTo()){
+                        s.events.add(new Evenement(temp, temps_simu + 1));
+                    } else {
+                        s.events.add(new Evenement(temps_simu + 1, temp, temp.prochainArret(temp.getPosition())));
+                    }
+                    temp.setPosition(actuel.getTo());
+                    if (!actuel.getBateau().getCapacite().isEmpty()){
+                        // Création de l'évènement pour déposer encore des containers de ce même bateau.
+                        s.events.add(new Evenement(actuel.getBateau(), temps_simu));
+                    } else { // Sinon le bateau est vide, on peut le supprimer
+                        actuel.getBateau().getPortAttache().getBateaux().remove(actuel.getBateau());
+                        actuel.getBateau().setPortAttache(null);
+                    }
+                } else {
+                    System.out.println("Un bateau n'a pas pu décharger un container au port "+actuel.getTo()+".");
+                    actuel.setTemps(temps_simu + 1);
+                    s.events.add(actuel);
+                }
+            } else if (actuel.getType() == 5) { // Si l'évènement est un retrait de container.
                 actuel.getContainer().retirerContainer();
                 System.out.println("Le container "+ actuel.getContainer() + " a été retiré au Port "+actuel.getFrom());
             }

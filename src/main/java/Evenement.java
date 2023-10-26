@@ -19,6 +19,8 @@ public class Evenement {
 
     private Itineraire itineraire; // type=0 : l'itinéraire du container.
 
+    private Bateau bateau; // Bateau concerné par l'évènement
+
 
     // En cas de nouvelle demande (type = 0)
     public Evenement(int temps, int nbContainers, Itineraire i){
@@ -38,18 +40,42 @@ public class Evenement {
         this.itineraire = e.getItineraire();
     }
 
-    // En cas de déplacement d'un container
-    public Evenement(Container c, Port from, Port to, int temps){
+    //Placement du container sur un port du bateau.
+    public Evenement(int temps, Container c, Port p){
         this.type = 1;
         this.temps = temps;
-        this.from = from;
-        this.to = to;
         this.container = c;
+        this.to = p;
+    }
+
+    //Détache d'un bateau
+    public Evenement(int temps, Bateau b){
+        this.type = 2;
+        this.temps = temps;
+        this.bateau = b;
+        this.from = b.getPortAttache();
+        this.to = b.getDestination();
+    }
+
+    //Rattachement du bateau au port.
+    public Evenement(int temps, Bateau b, Port dest){
+        this.type = 3;
+        this.temps = temps;
+        this.bateau = b;
+        this.to = b.getDestination();
+    }
+
+    // Vidage d'un container du bateau sur le port.
+    public Evenement(Bateau b, int temps){
+        this.type = 4;
+        this.bateau = b;
+        this.to = b.getPortAttache();
+        this.temps = temps;
     }
 
     //En cas de suppression d'un container
     public Evenement(Container c, int temps){
-        this.type = 2;
+        this.type = 5;
         this.temps = temps;
         this.from = c.getPosition();
         this.container = c;

@@ -15,5 +15,4 @@ Port A Port B Durée
 4 1 3
 Demandes
 temps nbContainers Itineraire (1;2;3;4)
-0 30 1;2;3
-10 10 2;5;4
+0 5 1;2;3

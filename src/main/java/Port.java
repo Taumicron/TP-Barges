@@ -2,6 +2,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -14,12 +15,13 @@ public class Port {
     private ArrayList<Service> services; // Liste des services depuis ce port. A l'échelle de l'ensemble des Port, cela représente la matrice de routage.
     private Integer cs; //Capacité max en containers
     private ArrayList<Container> capacite; // Liste des containers présents sur ce port. (la longueur représente la capacité actuelle)
-
+    private ArrayList<Bateau> bateaux;
     public Port(int id, int cs){
         this.id = id;
         this.services = new ArrayList<>();
         this.cs = cs;
         this.capacite = new ArrayList<>();
+        this.bateaux = new ArrayList<>();
     }
 
     public void addService(Service r) {
@@ -35,12 +37,11 @@ public class Port {
         }
     }
 
-    public Evenement creerContainer(Integer id, Evenement e, ArrayList<Evenement> evt) {
+    public Evenement creerContainer(Integer id, Evenement e, int temps) {
         if (this.capacite.size() < this.cs) {
             Container temp = new Container(id, e.getItineraire(), this);
             this.capacite.add(temp);
-            return new Evenement(temp, temp.getPosition(), temp.getItineraire().prochainArret(this),
-                    Math.max(this.tempsTrajet(temp.prochainArret(this)) + e.getTemps(), prochaineDispo(evt, e.getTemps()))); // Retourne le prochain évènement du container.
+            return new Evenement(temps, temp, e.getFrom());
         }
         return null;
     }
@@ -56,17 +57,18 @@ public class Port {
         }
     }
 
-    // Retourne le temps à partor duquel le port sera disponible du Port (pour pouvoir prendre en charge une demande. Retourne 0 si instantané
-    public Integer prochaineDispo(ArrayList<Evenement> events, int temps_simu){
-        if (this.capacite.size() < this.cs ){
-            return temps_simu;
+    public Bateau getBateauByDestination(Port destination, List<Evenement> events, int temps){
+        Optional<Bateau> temp = this.bateaux.stream().filter(x -> x.getDestination() == destination).findFirst();
+        if (temp.isEmpty()){ // Si un tel bateau n'existe pas, on le créé pour le retourner
+            Bateau b = new Bateau(3, this, destination, temps);
+            this.bateaux.add(b);
+            events.add(b.getDepartPrevu());
+            return b;
+        } else if (temp.get().getCapacite().size() == temp.get().getCapaciteMax()){
+            return null;
+        } else {
+            return temp.get();
         }
-        // La liste des évènements a déjà été préalablement ordonnée en fonction du temps.
-        Optional<Evenement> optEvt = events.stream().filter(x -> x.getType() == 1 && x.getFrom() == this
-                                                                || x.getType() == 2 && x.getFrom() == this)
-                                                                .findFirst();
-        if (optEvt.isEmpty()) return temps_simu; // S'il n'y a pas d'évènement concernant un déplacement vers ce container (redondant)
-        return optEvt.get().getTemps();
     }
 
     @Override
