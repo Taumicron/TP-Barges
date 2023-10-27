@@ -1,8 +1,10 @@
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class Evenement {
     private Integer type;   // 0 : Création d'un container dans le système (suite à une demande)
                     // 1 : Placement d'un container sur un bateau

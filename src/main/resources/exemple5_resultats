@@ -1,0 +1,10 @@
+Résultats statistiques :
+Pour les bateaux : taux d'occupation de la capacité en moyenne par tick (en %) | Attentes pour déchargement
+Bateau 1 : 50,00 	|	0
+Bateau 2 : 46,85 	|	0
+Bateau 3 : 50,09 	|	0
+Moyenne de tous les bateaux: 48.97932 | 0.0
+Pour les Ports : taux d'occupation de la capacité en moyenne par tick (en %)
+Port 1 : 99,39
+Port 2 : 6,94
+Moyenne de tous les ports: 53.166206

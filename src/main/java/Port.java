@@ -16,12 +16,17 @@ public class Port {
     private Integer cs; //Capacité max en containers
     private ArrayList<Container> capacite; // Liste des containers présents sur ce port. (la longueur représente la capacité actuelle)
     private ArrayList<Bateau> bateaux;
+    // Pour les mesures statistiques
+    private ArrayList<Integer> releveCapacite;
+
     public Port(int id, int cs){
         this.id = id;
         this.services = new ArrayList<>();
         this.cs = cs;
         this.capacite = new ArrayList<>();
         this.bateaux = new ArrayList<>();
+        // Pour les mesures statistiques
+        this.releveCapacite = new ArrayList<>();
     }
 
     public void addService(Service r) {

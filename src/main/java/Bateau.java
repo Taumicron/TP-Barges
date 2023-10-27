@@ -14,6 +14,9 @@ public class Bateau {
     private Port destination;
     private Evenement departPrevu;
     private Integer delaiDefaut;
+    // Pour les mesures statistiques des résultats :
+    private Integer attenteDechargement;
+    private ArrayList<Integer> releveCapacite;
 
     public Bateau(int id, int capMax, Port attache, Port[] dests, int delaiDefaut){
         this.id = id;
@@ -24,6 +27,9 @@ public class Bateau {
         this.source = this.portAttache == dests[1] ? dests[1] : dests[0];
         this.delaiDefaut = delaiDefaut;
         this.capacite = new ArrayList<>();
+        // Pour les mesures statistiques des résultats :
+        this.attenteDechargement = 0;
+        this.releveCapacite = new ArrayList<>();
     }
 
     public void ajouterContainer(Container c){
@@ -32,6 +38,14 @@ public class Bateau {
 
     public void preparerNavigation(int temps){
         this.setDepartPrevu(new Evenement(temps + this.getDelaiDefaut(), this));
+    }
+
+    public void ajoutAttenteDechargement(){
+        this.attenteDechargement++;
+    }
+
+    public void ajoutReleveCapacite(){
+        this.releveCapacite.add(this.getCapacite().size());
     }
     @Override
     public String toString(){
