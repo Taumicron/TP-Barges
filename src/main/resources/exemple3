@@ -4,7 +4,7 @@ id Capacitémax
 2 4
 3 5
 Services
-Port A Port B Durée CapBateau1,DelaiDefaut1,PortAttache1;CapBateau2,DelaiDefaut2,PortAttache2;...;CapBateauN,DelaiDefautN,PortAttacheN
+PortA PortB Durée CapBateau1,DelaiDefaut1,PortAttache1;CapBateau2,DelaiDefaut2,PortAttache2;...;CapBateauN,DelaiDefautN,PortAttacheN
 1 2 3 2,4,1
 2 3 3 2,4,3
 Demandes

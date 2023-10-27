@@ -23,6 +23,9 @@ public class Container {
         return this.itineraire.prochainArret(pos);
     }
 
+    /**
+     * Retire le container du port si c'est son port final.
+     */
     public void retirerContainer(){
         if (this.position == this.to){
             this.to.getCapacite().remove(this);

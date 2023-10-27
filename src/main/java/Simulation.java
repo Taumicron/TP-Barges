@@ -7,6 +7,8 @@ import java.util.*;
 @Getter
 @Setter
 public class Simulation {
+    public static final int LIMITE_TICKS_SIMULATION = (int) 2E4;
+
     private ArrayList<Port> ports;
     private ArrayList<Container> containers;
     private ArrayList<Evenement> events;
@@ -23,14 +25,13 @@ public class Simulation {
     public static void main(String[] args) throws FileNotFoundException {
         Simulation s = new Simulation();
 
-        // 0 : Logs en console, 1 : Logs en fichier (chemin modifiable, le fichier sera créé)
-        int log = 0;
-        if (log == 0) new File("./src/main/resources/output.log").delete();
-        PrintStream output = (log == 0 ? System.out : new PrintStream("./src/main/resources/output.log"));
+        // 0 : Logs en console, 1 : Logs en fichier (chemin modifiable, le fichier sera créé si inexistant)
+        boolean logSurConsole = false;
+        PrintStream output = (logSurConsole ? System.out : new PrintStream("./src/main/resources/output.log"));
 
         //Chemin actuel (pour se repérer pour trouver le fichier à lire)
         System.out.println(System.getProperty("user.dir"));
-        String path = "./src/main/resources/exemple5";
+        String path = "./src/main/resources/exemple1";
         s.lire_fichiers(path);
 
         // Simulation
@@ -62,7 +63,7 @@ public class Simulation {
 
             } else if (actuel.getType() == 1) { // Placement du container sur un bateau.
                 // temp <- Bateau sur lequel poser le container.
-                Bateau temp = actuel.getContainer().getPosition().getBateauByDestination(actuel.getContainer().prochainArret(actuel.getContainer().getPosition()), s.events, temps_simu);
+                Bateau temp = actuel.getContainer().getPosition().getBateauByDestination(actuel.getContainer().prochainArret(actuel.getContainer().getPosition()));
                 if (temp != null) {
                     actuel.getContainer().getPosition().getCapacite().remove(actuel.getContainer());
                     actuel.getContainer().setPosition(null);
@@ -102,6 +103,7 @@ public class Simulation {
                     s.events.add(new Evenement(actuel.getBateau(), temps_simu));
                 }
                 output.println("Le port " + actuel.getTo() + " vient de réceptionner le bateau " + actuel.getBateau());
+
             } else if (actuel.getType() == 4) { // Déplacement du container sur le port en vue de sa décharge.
                 if (actuel.getBateau().getCapacite().isEmpty()) {
                     actuel.getBateau().preparerNavigation(temps_simu);
@@ -138,8 +140,9 @@ public class Simulation {
                 actuel.getContainer().retirerContainer();
                 output.println("Le container " + actuel.getContainer() + " a été retiré au Port " + actuel.getFrom());
             }
-        } while (!s.containers.stream().allMatch(x -> x.getPosition() == x.getTo()) || s.events.stream().anyMatch(x -> x.getType() == 0 || x.getType() == 5));
+        } while ((!s.containers.stream().allMatch(x -> x.getPosition() == x.getTo()) || s.events.stream().anyMatch(x -> x.getType() == 0 || x.getType() == 5)) && temps_simu < LIMITE_TICKS_SIMULATION);
         output.println("Fin de la simulation.");
+        if (temps_simu >= 2E4) output.println("Simulation arrêtée car délai dépassé (25000 ticks)");
         // Ecriture des résultats dans un fichier [nom_fichier]_resultats
         output = new PrintStream(path+"_resultats");
         output.println("Résultats statistiques :\nPour les bateaux : taux d'occupation de la capacité en moyenne par tick (en %) | Attentes pour déchargement");
@@ -153,7 +156,7 @@ public class Simulation {
             }
             temp.add(moy / (float) x.getReleveCapacite().size());
             output.printf("Bateau " + x.getId() + " : %.2f" +
-                    " \t|\t" + x.getAttenteDechargement() + "\n", (float) moy / (float) x.getReleveCapacite().size());
+                    " \t|\t" + x.getAttenteDechargement() + "\n", moy / (float) x.getReleveCapacite().size());
         }
         float moy = 0;
         for(float x : temp) moy += x;
@@ -166,11 +169,12 @@ public class Simulation {
                 moy += 100 * (float) y / (float) p.getCs();
             }
             temp.add(moy / (float) p.getReleveCapacite().size());
-            output.printf("Port " + p.getId() + " : %.2f\n",(float) moy / (float) p.getReleveCapacite().size());
+            output.printf("Port " + p.getId() + " : %.2f\n",moy / (float) p.getReleveCapacite().size());
         }
         moy = 0;
         for (float x :temp) moy += x;
         output.println("Moyenne de tous les ports: "+moy/(float)temp.size());
+        if (temps_simu >= LIMITE_TICKS_SIMULATION) output.println("SIMULATION PAS ARRIVEE A TERME EN RAISON D'UNE PROBABLE BOUCLE INFINIE");
     }
 
     /**

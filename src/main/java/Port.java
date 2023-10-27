@@ -29,6 +29,10 @@ public class Port {
         this.releveCapacite = new ArrayList<>();
     }
 
+    /**
+     * Ajouter un service à la liste des services du port. Ajoute également le Service au port lié.
+     * @param r Service.
+     */
     public void addService(Service r) {
         if (!(r.getPort().get(0) == this || r.getPort().get(1) == this)){
             System.out.println("Erreur lors de l'ajout de " + r + " depuis le port " + this);
@@ -42,6 +46,13 @@ public class Port {
         }
     }
 
+    /**
+     * Crée le container dans le port
+     * @param id id du container
+     * @param e Evenement de création de container
+     * @param temps Temps actuel de la simulation
+     * @return L'évènement de mise sur un bateau du container s'il a été créé, null sinon
+     */
     public Evenement creerContainer(Integer id, Evenement e, int temps) {
         if (this.capacite.size() < this.cs) {
             Container temp = new Container(id, e.getItineraire(), this);
@@ -62,7 +73,12 @@ public class Port {
         }
     }
 
-    public Bateau getBateauByDestination(Port destination, List<Evenement> events, int temps){
+    /**
+     * Retourne le premier bateau de la liste des bateaux du port se dirigeant vers la destination
+     * @param destination Port de destination (doit être lié au port actuel par un service)
+     * @return Le bateau s'il existe et peut charger au moins un container de plus, null sinon
+     */
+    public Bateau getBateauByDestination(Port destination){
         Optional<Bateau> temp = this.bateaux.stream().filter(x -> x.getDestination() == destination).findFirst();
         if (temp.isEmpty()){ // Si un tel bateau n'est pas disponible
             return null;

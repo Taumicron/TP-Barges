@@ -32,18 +32,32 @@ public class Bateau {
         this.releveCapacite = new ArrayList<>();
     }
 
+    /**
+     * Ajouter le container en paramètre sur le bateau
+     * @param c Container
+     */
     public void ajouterContainer(Container c){
         this.capacite.add(c);
     }
 
+    /**
+     * Assigne au bateau son départ prévu par défaut (sauf s'il est plein).
+     * @param temps temps actuel de la simulation.
+     */
     public void preparerNavigation(int temps){
         this.setDepartPrevu(new Evenement(temps + this.getDelaiDefaut(), this));
     }
 
+    /**
+     * Mesure statistique : incrémente le nombre d'attentes pour déchargement
+     */
     public void ajoutAttenteDechargement(){
         this.attenteDechargement++;
     }
 
+    /**
+     * Mesure statistique : relève la capacité actuelle du bateau.
+     */
     public void ajoutReleveCapacite(){
         this.releveCapacite.add(this.getCapacite().size());
     }

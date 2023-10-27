@@ -7,24 +7,22 @@ import lombok.ToString;
 @ToString
 public class Evenement {
     private Integer type;   // 0 : Création d'un container dans le système (suite à une demande)
-                    // 1 : Placement d'un container sur un bateau
-                    // 2 : Détache d'un bateau de son port
-                    // 3 : Rattachement d'un bateau à son port d'arrivée
-                    // 4 : Dépot d'un container sur un port par un bateau
-                    // 5 : Retrait d'un container arrivé à sa destination finale.
+                            // 1 : Placement d'un container sur un bateau
+                            // 2 : Détache d'un bateau de son port
+                            // 3 : Rattachement d'un bateau à son port d'arrivée
+                            // 4 : Dépot d'un container sur un port par un bateau
+                            // 5 : Retrait d'un container arrivé à sa destination finale.
     private Integer temps; // En demi-journées, temps auquel l'évènement occurera
-    private Container container; // Le container concerné par l'évènement.
+    private Container container; // Le container concerné par l'évènement. Peut être null
 
-    private Integer nbContainers; // type=0 : Le nombre de containers qui doivent être créés par la demande.
+    private Integer nbContainers; // type=0 : Le nombre de containers qui doivent être créés par la demande. Peut être null
 
-    private Port from; // type=0 : le Port où ajouter le container
-                            //type=1 : le Port où est actuellement le container
-                            //type=2 : le Port où supprimer le container.
-    private Port to; // type=1 : Le port où le container va
+    private Port from; // Port de départ de l'évènement (peut être null)
+    private Port to; // Port d'arrivée de l'évènement (peut être null)
 
     private Itineraire itineraire; // type=0 : l'itinéraire du container.
 
-    private Bateau bateau; // Bateau concerné par l'évènement
+    private Bateau bateau; // Bateau concerné par l'évènement (peut être null)
 
 
     // En cas de nouvelle demande

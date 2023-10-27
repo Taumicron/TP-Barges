@@ -10,7 +10,7 @@ import java.util.ArrayList;
 @Getter
 @Setter
 public class Service {
-    private ArrayList<Port> port;
+    private ArrayList<Port> port; // 2 ports liés par le service.
     private Integer duree; // en demi-journée
     public Service(Port s1, Port s2, int duree){
         this.port = new ArrayList<>(2);
